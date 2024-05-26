@@ -68,8 +68,9 @@ fun App() {
                 .fillMaxWidth(),
             targetState = uiModel,
             transitionSpec = {
-                fadeIn()
-                    .togetherWith(fadeOut())
+                (fadeIn(animationSpec = tween(220, delayMillis = 90)) +
+                        scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 90)))
+                    .togetherWith(fadeOut(animationSpec = tween(90)))
                     .using(SizeTransform(
                         clip = true,
                         sizeAnimationSpec = { initialSize, targetSize ->
@@ -103,14 +104,16 @@ fun App() {
 //                )
 
                 Box(
-                    modifier = Modifier.size(if (innerTarget.contentSize == UiModel.ContentSize.Medium) 200.dp else 100.dp)
+                    modifier = Modifier
+//                        .animateContentSize(animationSpec = tween(2000))
+                        .size(if (innerTarget.contentSize == UiModel.ContentSize.Medium) 200.dp else 100.dp)
                         .background(Color.Yellow)
-                )
+                ) {
 
                 Text(
                     modifier = Modifier.align(Alignment.BottomStart),
                     text = "Bottom ttext"
-                )
+                )}
             }
 //            }
         }
