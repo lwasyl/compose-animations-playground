@@ -1,5 +1,4 @@
 import androidx.compose.animation.*
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -68,28 +66,29 @@ fun App() {
                 .fillMaxWidth(),
             targetState = uiModel,
             transitionSpec = {
-                (fadeIn(animationSpec = tween(220, delayMillis = 90)) +
-                        scaleIn(initialScale = 0.92f, animationSpec = tween(220, delayMillis = 90)))
-                    .togetherWith(fadeOut(animationSpec = tween(90)))
+                if (targetState.contentSize.ordinal > initialState.contentSize.ordinal) {
+                    newStateVisibleAtTheEnd
+                } else {
+                    newStateVisibleImmediately
+                }
                     .using(SizeTransform(
-                        clip = true,
+                        clip = false,
                         sizeAnimationSpec = { initialSize, targetSize ->
                             println("going $initialSize -> $targetSize")
-                            keyframes {
-                                IntSize(targetSize.width, initialSize.height) at 0
-                            }
+                            tween(CONTENT_TRANSFORM_DURATION)
                         }
                     ))
+//                    .using(null)
             },
 
-            contentKey = { uiModel.contentSize },
+            contentKey = { it.contentSize },
             label = "Inner container",
         ) { innerTarget ->
 
             Box(
                 modifier = Modifier
                     .background(Color.Green)
-//                        .animateContentSize(animationSpec = tween(2000))
+                    .animateContentSize(animationSpec = tween(CONTENT_TRANSFORM_DURATION))
                     .fillMaxWidth()
                     .clickable { uiModel = uiModel.next() }
             ) {
@@ -105,15 +104,16 @@ fun App() {
 
                 Box(
                     modifier = Modifier
-//                        .animateContentSize(animationSpec = tween(2000))
+                        .animateContentSize(animationSpec = tween(CONTENT_TRANSFORM_DURATION))
                         .size(if (innerTarget.contentSize == UiModel.ContentSize.Medium) 200.dp else 100.dp)
                         .background(Color.Yellow)
                 ) {
 
-                Text(
-                    modifier = Modifier.align(Alignment.BottomStart),
-                    text = "Bottom ttext"
-                )}
+                    Text(
+                        modifier = Modifier.align(Alignment.BottomStart),
+                        text = "Bottom ttext"
+                    )
+                }
             }
 //            }
         }
