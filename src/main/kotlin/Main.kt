@@ -1,9 +1,12 @@
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.IndicationInstance
 import androidx.compose.foundation.LocalIndication
@@ -14,6 +17,7 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.MaterialTheme
@@ -70,14 +74,15 @@ fun AnimationIssue(
                 targetState = data,
                 modifier = Modifier,
                 transitionSpec = {
-                    // if (initialState::class != targetState::class) {
-                    animatedContentTransform
-                    // } else {
-                    //     animatedContentTransform.using(sizeTransform = null)
-                    // }
+                    println("$initialState -> $targetState")
+                    if ("foo" != "foo") {
+                        animatedContentTransform
+                    } else {
+                        EnterTransition.None.togetherWith(ExitTransition.None).using(sizeTransform = null)
+                    }
                 },
                 label = "MiddleAnimationLabel",
-                contentKey = { it::class },
+                contentKey = { "foo" },
             ) { targetData ->
                 AnimatedContent(
                     targetState = targetData.items,
@@ -93,10 +98,15 @@ fun AnimationIssue(
     }
 }
 
+@Preview
+fun SomePreview() {
+    Box(modifier = Modifier.size(300.dp).background(Color.Red))
+}
+
 @Immutable
 data class NewData(
     val items: Int,
-    val lambdaWithCapture: Any,
+    val lambdaWithCapture: () -> Unit,
 )
 
 @Immutable
@@ -120,8 +130,14 @@ fun main() = application {
 
 const val CONTENT_TRANSFORM_DURATION = 1000
 
-val animatedContentTransform = fadeIn(tween(durationMillis = 500, delayMillis = 500)).togetherWith(fadeOut(tween(durationMillis = 500)))
-val bothStatesVisibleContentTransform = fadeIn(snap(0)) togetherWith fadeOut(snap(CONTENT_TRANSFORM_DURATION))
+val animatedContentTransform
+    get() = fadeIn(
+        tween(
+            durationMillis = 500,
+            delayMillis = 500
+        )
+    ).togetherWith(fadeOut(tween(durationMillis = 500)))
+val bothStatesVisibleContentTransform get() = fadeIn(snap(0)) togetherWith fadeOut(snap(CONTENT_TRANSFORM_DURATION))
 
 object CircleIndicator : Indication {
 
